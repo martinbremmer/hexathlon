@@ -21,13 +21,14 @@ import wx
 class Gui():
     def __init__(self):
         # Initialize wx...
-        self._wx = wx.PySimpleApp()
+        #self._wx = wx.PySimpleApp()
+        self._wx = wx.App()
         self._progress = None
         return
 
     def dialogOpenFile(self, info):
         filename = None
-        dialog = wx.FileDialog(None, info, os.getcwd(), "", "*", wx.OPEN | wx.CHANGE_DIR)
+        dialog = wx.FileDialog(None, info, os.getcwd(), "", "*", wx.FD_OPEN | wx.FD_CHANGE_DIR)
         if dialog.ShowModal() == wx.ID_OK:
             filename = dialog.GetPath()
             dialog.Destroy()
@@ -38,7 +39,7 @@ class Gui():
 
     def dialogSelectDirectory(self, info):
         dirname = None
-        dialog = wx.DirDialog(None, info, os.getcwd(), wx.DD_DEFAULT_STYLE | wx.CHANGE_DIR)
+        dialog = wx.DirDialog(None, info, os.getcwd(), wx.DD_DEFAULT_STYLE | wx.FD_CHANGE_DIR)
         if dialog.ShowModal() == wx.ID_OK:
             dirname = dialog.GetPath()
             dialog.Destroy()
@@ -202,7 +203,7 @@ class Match():
 
 class Timeslot():
     def __init__(self, time, games, teams, pairs):
-        #print "Timeslot({})".format(time)
+        print("Timeslot({})".format(time))
         self._time = time
         self._teams = list(teams)
         self._recess = []
@@ -239,15 +240,15 @@ class Timeslot():
                 slotPairs.append(pair)
                 # This pair is used
                 pair.setScheduled(True)
-                #print "Match: {}".format(self._matches[idx].toString())
+                #print("Match: {}".format(self._matches[idx].toString()))
             else:
-                #print "Match: None"
+                print("Match: None")
                 return False
 
         # Do all previous recess teams have been scheduled?
         if len(preferredTeams) > 0:
-            #print "Timeslot: not all recess teams scheduled"
-            #print "-"
+            #print("Timeslot: not all recess teams scheduled")
+            print("-")
             return False
 
         self._fillRecess()
@@ -266,11 +267,11 @@ class Timeslot():
                 for s in slots:
                     if s._matches[idx].getPair().contains(t):
                         noplay.remove(t)
-            assert len(noplay) is 1
+            assert len(noplay) == 1
             self._matches[idx].addPair(Pair(noplay[0], Team("-|10"), False))
             #for t in noplay:
-            #    print "team: {}".format(t.toString())
-            #print "UnevenMatch: {} ---".format(match.toString())
+            #    print("team: {}".format(t.toString()))
+            #print("UnevenMatch: {} ---".format(match.toString()))
 
         return
 
@@ -281,7 +282,7 @@ class Timeslot():
         assert excludedPairs2 is not None
         assert preferredTeams is not None
 
-        #print "_findPair {}".format(preferredTeams)
+        #print("_findPair {}".format(preferredTeams))
 
         random.shuffle(self._pairs)
 
@@ -310,7 +311,7 @@ class Timeslot():
         for p in self._pairs:
             if p.available(excludedPairs1) and p.available(excludedPairs2):
                 pair = p
-        #print "_findPair0 {}".format(pair)
+        #print("_findPair0 {}".format(pair)
         return pair
 
     def _findPair1(self, excludedPairs1, excludedPairs2, preferredTeam):
@@ -321,7 +322,7 @@ class Timeslot():
             if p.available(excludedPairs1) and p.available(excludedPairs2):
                 if p.contains(preferredTeam):
                     pair = p
-        #print "_findPair1 {}".format(pair)
+        #print("_findPair1 {}".format(pair))
         return pair
 
     def _findPairN(self, excludedPairs1, excludedPairs2, preferredTeams):
@@ -334,7 +335,7 @@ class Timeslot():
                 for t in preferredTeams:
                     if p.contains(t):
                         pair = p
-        #print "_findPairN {}".format(pair)
+        #print("_findPairN {}".format(pair))
         return pair
 
     def _filterTeams(self, teams, excludedPairs):
@@ -419,7 +420,7 @@ class Tournament():
         #        nicest = self._niceValue
         #        nicecnt = 0
         #    nicecnt += 1
-        #    print "({}){}/{}".format(nicecnt, self._niceValue, nicest),
+        #    print("({}){}/{}".format(nicecnt, self._niceValue, nicest), end="")
         #    sys.stdout.flush()
         return
 
@@ -442,14 +443,14 @@ class Tournament():
                 self._reset()
                 i = 0
         if self._unevenTeams:
-            #print "Uneven number of teams."
+            #print("Uneven number of teams.")
             t = Timeslot(len(self._teams) / 2, self._games, self._teams, self._pairs)
             t.fillUneven(self._timeslots, self._teams)
             self._timeslots.append(t)
         return
 
     def _reset(self):
-        print ".",
+        print(".", end="")
         sys.stdout.flush()
         random.shuffle(self._pairs)
         for p in self._pairs:
@@ -466,7 +467,7 @@ class Tournament():
         self._niceValue = 0
         for teamAidx in range(len(self._teams)):
             teamA = self._teams[teamAidx]
-            #print "Nice for {}".format(teamA.toString())
+            #print("Nice for {}".format(teamA.toString()))
 
             #
             # The following is not needed anymore because we work with
@@ -497,7 +498,7 @@ class Tournament():
                 timeslotA = self._timeslots[slotIdx]
                 timeslotB = self._timeslots[slotIdx + 1]
                 #if timeslotA.teamInRecess(teamA):
-                #    print "Pauze for {} in {}".format(teamA.toString(), slotIdx)
+                #    print("Pauze for {} in {}".format(teamA.toString(), slotIdx))
                 if timeslotA.teamInRecess(teamA) and timeslotB.teamInRecess(teamA):
                     cnt += 1
                     self._calcinfo.append("{}: {} pauze".format(cnt, teamA.toString()))
@@ -530,7 +531,7 @@ class Tournament():
         if self._niceValue < 0:
             self._calculateTournamentNiceValue()
         for i in self._calcinfo:
-            print "{}".format(i)
+            print("{}".format(i))
         return
 
     def output(self, directory):
@@ -712,8 +713,8 @@ class Tournament():
     def display(self):
         for row in self._matches:
             for match in row:
-                print match.toString()
-        print "Nice: {}".format(self.niceValue())
+                print(match.toString())
+        print("Nice: {}".format(self.niceValue()))
         return
 
 
@@ -770,16 +771,16 @@ def main():
     tournament = None
     nicest = Tournament(games, teams)
     cnt = 0
-    while nicest.niceValue() > 0 and cnt < 1000:
+    while nicest.niceValue() > 0 and cnt < 100:
         tournament = Tournament(games, teams)
         if tournament.niceValue() < nicest.niceValue():
             nicest = tournament
             cnt = 0
         cnt += 1
-        print "({}){}/{}".format(cnt, tournament.niceValue(), nicest.niceValue()),
+        print("({}){}/{}".format(cnt, tournament.niceValue(), nicest.niceValue()), end="")
         sys.stdout.flush()
     tournament = nicest
-    print ""
+    print("")
     tournament.niceValueInfo()
 
     # Create output files
