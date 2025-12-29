@@ -1,27 +1,32 @@
 #!/usr/bin/python
 
-# 
+#
 # Please be aware that this code uses a lot of brute force loops and random stuff.
 # It could be a lot more effecient.
 # I'm too lazy to redesign/recode stuff to make it less brute force.
 # Anyway, in the state it is now, the code is effecient enough...
 #
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
+import math
 import random
 import itertools
+import argparse
 
 ###############################################################################################################################
 # GUI class
 
 import wx
+from six.moves import filter
+from six.moves import range
 
 
 class Gui():
     def __init__(self):
         # Initialize wx...
-        #self._wx = wx.PySimpleApp()
         self._wx = wx.App()
         self._progress = None
         return
@@ -60,8 +65,8 @@ class Gui():
 
     def dialogProgressStart(self, info):
         assert self._progress is None
-        self._progress = wx.ProgressDialog("Progress", 
-                                           info, 
+        self._progress = wx.ProgressDialog("Progress",
+                                           info,
                                            100,
                                            style=wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME)
         return
@@ -203,7 +208,7 @@ class Match():
 
 class Timeslot():
     def __init__(self, time, games, teams, pairs):
-        print("Timeslot({})".format(time))
+        #print("Timeslot({})".format(time), end='')
         self._time = time
         self._teams = list(teams)
         self._recess = []
@@ -242,13 +247,13 @@ class Timeslot():
                 pair.setScheduled(True)
                 #print("Match: {}".format(self._matches[idx].toString()))
             else:
-                print("Match: None")
+                #print("Match: None")
                 return False
 
         # Do all previous recess teams have been scheduled?
         if len(preferredTeams) > 0:
             #print("Timeslot: not all recess teams scheduled")
-            print("-")
+            #print("-")
             return False
 
         self._fillRecess()
@@ -409,19 +414,6 @@ class Tournament():
         self._reset()
         self._fillMatrix()
         self._calculateTournamentNiceValue()
-        #nicecnt = 0
-        #nicest = 1000
-        #while self._niceValue > 0 and nicecnt < 1000:
-        #    self._reset()
-        #    self._fillMatrix()
-        #    self._calculateTournamentNiceValue()
-        #    #self._niceValue = -1
-        #    if self._niceValue < nicest:
-        #        nicest = self._niceValue
-        #        nicecnt = 0
-        #    nicecnt += 1
-        #    print("({}){}/{}".format(nicecnt, self._niceValue, nicest), end="")
-        #    sys.stdout.flush()
         return
 
     def _fillMatrix(self):
@@ -433,8 +425,9 @@ class Tournament():
         # It is solvable brute forece, but it could take a while.
         # So, Keep trying to get all matches for this game.
         #
-        i = 0
-        while i < len(self._teams) / 2:
+        i = int(0)
+        pairs = int(math.floor(len(self._teams) / 2))
+        while i < pairs:
             t = Timeslot(i, self._games, self._teams, self._pairs)
             if t.fill(self._timeslots):
                 self._timeslots.append(t)
@@ -450,7 +443,7 @@ class Tournament():
         return
 
     def _reset(self):
-        print(".", end="")
+        print(".", end='')
         sys.stdout.flush()
         random.shuffle(self._pairs)
         for p in self._pairs:
@@ -468,25 +461,6 @@ class Tournament():
         for teamAidx in range(len(self._teams)):
             teamA = self._teams[teamAidx]
             #print("Nice for {}".format(teamA.toString()))
-
-            #
-            # The following is not needed anymore because we work with
-            # pairings now.
-            #
-            # Get how often this team has the same oponents.
-            #tmpValue = 0
-            #for teamBidx in range(teamAidx + 1, len(self._teams)):
-            #    teamB = self._teams[teamBidx]
-            #    cnt = -1
-            #    for t in self._timeslots:
-            #        for match in t.getMatches():
-            #            if match.contains(teamA) and match.contains(teamB):
-            #                cnt += 1
-            #                if cnt > 0:
-            #                    self._calcinfo.append("{}: {} -VS- {}".format(cnt, teamA.toString(), teamB.toString()))
-            #    if cnt > 0:
-            #        tmpValue += 5 << cnt
-            #self._niceValue += tmpValue
 
             # Get how often this team has successive recesses.
             # We don't care about the last slot. If applicable,
@@ -536,6 +510,9 @@ class Tournament():
 
     def output(self, directory):
         assert directory
+        while os.path.exists(directory):
+            directory = directory+"_"
+        os.makedirs(directory)
         # Create three files:
         #   1) Complete tournament schedule in html.
         #   2) Html document containing score forms for all games.
@@ -736,7 +713,7 @@ def readLineFile(filename):
     if content is not None:
         lines = content.split('\n')
     lines = [s.strip() for s in lines]
-    lines = filter(len, lines)
+    lines = list(filter(len, lines))
     return lines
 
 
@@ -745,18 +722,37 @@ def main():
     teams = []
     gui = Gui()
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--teams',  type=int, help='Number of teams.')
+    parser.add_argument('--games',  type=int, help='Number of games.')
+    parser.add_argument('--output', type=str, help='Directory to put the results into.')
+
+    args = parser.parse_args()
+
     # Ask user to open files, then read them into arrays.
-    gui.dialogInfo("Open file containing games")
-    filenameGames = gui.dialogOpenFile("Open file containing games")
-    lines = readLineFile(filenameGames)
+    # or just generate the games and teams lists.
+    lines = []
+    if args.games is not None:
+        for i in range(0, args.games):
+            lines.append("Game{}".format(i+1))
+    else:
+        gui.dialogInfo("Open file containing games")
+        filenameGames = gui.dialogOpenFile("Open file containing games")
+        lines = readLineFile(filenameGames)
     for line in lines:
         game = Game(line)
         if game in games:
             gui.dialogExit("Two games with the same name")
         games.append(game)
-    gui.dialogInfo("Open file containing teams")
-    filenameTeams = gui.dialogOpenFile("Open file containing teams")
-    lines = readLineFile(filenameTeams)
+        filenameTeams = None
+    lines = []
+    if args.teams is not None:
+        for i in range(0, args.teams):
+            lines.append("Team{}|{}".format(i+1, i+1))
+    else:
+        gui.dialogInfo("Open file containing teams")
+        filenameTeams = gui.dialogOpenFile("Open file containing teams")
+        lines = readLineFile(filenameTeams)
     for line in lines:
         team = Team(line)
         if team in teams:
@@ -767,29 +763,38 @@ def main():
     if len(games) * 2 > len(teams):
         gui.dialogExit("This only works if you have at least twice the number of teams compared to the number of games")
 
+    # Some nice info
+    print("Generate for {} teams...".format(len(teams)))
+    # for t in teams:
+    #     print("Team: {}".format(t.toString()))
+    # for g in games:
+    #     print("Game: {}".format(g.toString()))
+
     # Create tournament
     tournament = None
     nicest = Tournament(games, teams)
     cnt = 0
-    while nicest.niceValue() > 0 and cnt < 100:
+    while nicest.niceValue() > 0 and cnt < 10:
         tournament = Tournament(games, teams)
         if tournament.niceValue() < nicest.niceValue():
             nicest = tournament
             cnt = 0
         cnt += 1
-        print("({}){}/{}".format(cnt, tournament.niceValue(), nicest.niceValue()), end="")
+        print("({}){}/{}".format(cnt, tournament.niceValue(), nicest.niceValue()))
         sys.stdout.flush()
     tournament = nicest
     print("")
     tournament.niceValueInfo()
 
     # Create output files
-    #gui.dialogInfo("Tournament nice value: {}\n\nNow, select output directory...".format(tournament.niceValue()))
-    gui.dialogInfo("Select Tournament output directory...")
-    dirname = gui.dialogSelectDirectory("Open output directory")
+    dirname = None
+    if args.output is not None:
+        dirname = "{}/{}/{}".format(args.output, len(teams), tournament.niceValue())
+    else:
+        gui.dialogInfo("Select Tournament output directory...")
+        dirname = gui.dialogSelectDirectory("Open output directory")
     tournament.output(dirname)
 
-    gui.dialogInfo("Done")
     return
 
 
