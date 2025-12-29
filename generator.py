@@ -396,6 +396,7 @@ class Tournament():
         self._niceValue = -1
 
         # Initialize internal information
+        self._resets = 0
         self._pairs = []
         self._games = games
         self._teams = teams
@@ -443,7 +444,9 @@ class Tournament():
         return
 
     def _reset(self):
-        print(".", end='')
+        if self._resets % 1000 == 0:
+            print(".", end='')
+        self._resets = self._resets + 1
         sys.stdout.flush()
         random.shuffle(self._pairs)
         for p in self._pairs:
@@ -590,12 +593,13 @@ class Tournament():
                 else:
                     teamB = teamB.toString()
                 teamA = teamA.toString()
+                game = match.getGame().toString()
                 # Print match info.
                 f.write("   <TR>\n")
                 f.write("      <TD STYLE={} HEIGHT=\"20\" ALIGN=\"LEFT\"><BR></TD>\n".format(leftBoxStyle))
-                f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE>{}</TD>\n".format(boxStyleEnclosed, match.getGame().toString()))
-                f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE>{}</TD>\n".format(boxStyleEnclosed, teamA))
-                f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE>{}</TD>\n".format(boxStyleEnclosed, teamB))
+                f.write("      <TD NAME=\"{}\" STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE>{}</TD>\n".format(game,  boxStyleEnclosed, game ))
+                f.write("      <TD NAME=\"{}\" STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE>{}</TD>\n".format(teamA, boxStyleEnclosed, teamA))
+                f.write("      <TD NAME=\"{}\" STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE>{}</TD>\n".format(teamB, boxStyleEnclosed, teamB))
                 f.write("   </TR>\n")
             # Table tail
             f.write("</TABLE>\n")
@@ -604,10 +608,11 @@ class Tournament():
             position = self._timeslots.index(timeslot) + 1
             if (position % 5) == 0:
                 f.write("<p style=\"page-break-before: always\"><!-- NEXT PAGE --></p>\n")
+
+        self._outputJScript(f)
         self._outputHtmlTail(f)
         f.close()
         return
-
 
     def _outputGamesScores(self, directory):
         filename = "{}/gamesScores.html".format(directory)
@@ -623,7 +628,7 @@ class Tournament():
             # Game meta info
             f.write("   <TR>\n")
             f.write("      <TD HEIGHT=\"25\" ALIGN=\"LEFT\"><B><I><FONT SIZE=4>SPEL</FONT></I></B></TD>\n")
-            f.write("      <TD ALIGN=\"LEFT\"><B><I><FONT SIZE=4>{}</FONT></I></B></TD>\n".format(game.toString()))
+            f.write("      <TD ALIGN=\"LEFT\" NAME=\"{}\"><B><I><FONT SIZE=4>{}</FONT></I></B></TD>\n".format(game.toString(), game.toString()))
             f.write("      <TD ALIGN=\"LEFT\"><BR></TD>\n")
             f.write("      <TD ALIGN=\"LEFT\"><BR></TD>\n")
             f.write("   </TR>\n")
@@ -648,13 +653,13 @@ class Tournament():
                         teamA = teamA.toString()
                         f.write("   <TR>\n")
                         f.write("      <TD STYLE={} HEIGHT=\"30\" ALIGN=\"LEFT\"><BR></TD>\n".format(boxStyleOpenBottom))
-                        f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE><FONT SIZE=4>{}</FONT></TD>\n".format(boxStyleEnclosed, teamA))
+                        f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE NAME=\"{}\" ><FONT SIZE=4>{}</FONT></TD>\n".format(teamA, boxStyleEnclosed, teamA))
                         f.write("      <TD STYLE={} ALIGN=\"LEFT\"><BR></TD>\n".format(boxStyleEnclosed))
                         f.write("      <TD STYLE={} ALIGN=\"LEFT\"><BR></TD>\n".format(boxStyleEnclosed))
                         f.write("   </TR>\n")
                         f.write("   <TR>\n")
                         f.write("      <TD STYLE={} HEIGHT=\"30\" ALIGN=\"LEFT\"><BR></TD>\n".format(boxStyleOpenTop))
-                        f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE><FONT SIZE=4>{}</FONT></TD>\n".format(boxStyleEnclosed, teamB))
+                        f.write("      <TD STYLE={} ALIGN=\"LEFT\" VALIGN=MIDDLE NAME=\"{}\" ><FONT SIZE=4>{}</FONT></TD>\n".format(teamB, boxStyleEnclosed, teamB))
                         f.write("      <TD STYLE={} ALIGN=\"LEFT\"><BR></TD>\n".format(boxStyleEnclosed))
                         f.write("      <TD STYLE={} ALIGN=\"LEFT\"><BR></TD>\n".format(boxStyleEnclosed))
                         f.write("   </TR>\n")
@@ -663,6 +668,8 @@ class Tournament():
             f.write("</TABLE>\n")
             if game is not self._games[-1]:
                 f.write("<p style=\"page-break-before: always\"><!-- NEXT PAGE --></p>\n")
+
+        self._outputJScript(f)
         self._outputHtmlTail(f)
         f.close()
         return
@@ -680,6 +687,19 @@ class Tournament():
         f.write("   </STYLE>\n")
         f.write("</HEAD>\n")
         f.write("<BODY TEXT=\"#000000\">\n")
+        return
+
+    def _outputJScript(self, f):
+        f.write("<script>\n")
+        f.write("for (let i = 0; i < 42; i++) {\n")
+        f.write("  var team = \"Team\"+i.toString();\n")
+        f.write("  var ploeg = \"Ploeg\"+i.toString();\n")
+        f.write("  const teams = document.getElementsByName(team);\n")
+        f.write("  for(var x=0; x < teams.length; x++) {\n")
+        f.write("    teams[x].innerText = ploeg;\n")
+        f.write("  }\n")
+        f.write("}\n")
+        f.write("</script>\n")
         return
 
     def _outputHtmlTail(self, f):
