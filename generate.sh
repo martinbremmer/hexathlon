@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SECONDS=0
-for t in {12..15}
+for t in {12..40}
 do
     echo "Generate $t..."
     python3 generator.py --teams=$t --games=6 --output="./website"

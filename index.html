@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+  <TITLE>Hexathlon</TITLE>
+  <META NAME="HEXATHLON" CONTENT="HexathlonIndex" CHARSET="utf-8">
+  <SCRIPT>
+
+    function getFormInputs(key) {
+      var elements = document.getElementById("hexForm").elements;
+      let values = new Map();
+      for (var i = 0, element; element = elements[i++];) {
+        if (element.type === "text" && element.value !== "") {
+          if (element.id.includes(key)) {
+            values.set(element.id, encodeURIComponent(element.value));
+          }
+        }
+      }
+      return values;
+    }
+
+    function getParams(map) {
+      params = "";
+      for (let [key, value] of map) {
+        if (params.length !== 0) {
+          params = params + "&";
+        }
+        params = params + key + "=" + value;
+      }
+      return params;
+    }
+
+    function openURL(url, params) {
+      window.open(url+"?"+params,'_blank');
+    }
+
+    function handleSubmit(page) {
+      let teams  = getFormInputs("Team");
+      let games  = getFormInputs("Game");
+      if (games.size != 6) {
+        alert("Needs 6 games (have "+games.size.toString()+").");
+      }
+      if (teams.size < 12) {
+        alert("At least needs 12 teams (have "+teams.size.toString()+").");
+        return;
+      }
+      let params = getParams(teams) + "&" + getParams(games);
+      let path   = "./website/"+teams.size.toString()+"/7560/";
+      openURL(path+page, params);
+    }
+    function handleScores() {
+      handleSubmit("gamesScores.html");
+    }
+    function handleSchema() {
+      handleSubmit("totalSchema.html");
+    }
+
+  </SCRIPT>
+</HEAD>
+<BODY TEXT="#000000">
+
+<FORM ID="hexForm">
+  Games <BR>
+  <TABLE>
+    <TR><TD>Game1</TD><TD><input TYPE="text" ID="Game1" NAME="Game1" /></TD></TR>
+    <TR><TD>Game2</TD><TD><input TYPE="text" ID="Game2" NAME="Game2" /></TD></TR>
+    <TR><TD>Game3</TD><TD><input TYPE="text" ID="Game3" NAME="Game3" /></TD></TR>
+    <TR><TD>Game4</TD><TD><input TYPE="text" ID="Game4" NAME="Game4" /></TD></TR>
+    <TR><TD>Game5</TD><TD><input TYPE="text" ID="Game5" NAME="Game5" /></TD></TR>
+    <TR><TD>Game6</TD><TD><input TYPE="text" ID="Game6" NAME="Game6" /></TD></TR>
+  </TABLE>
+  Teams <BR>
+  <TABLE>
+    <TR>
+        <TD>Team1 </TD><TD><input TYPE="text" ID="Team1"  NAME="Team1"  /></TD><TD></TD>
+        <TD>Team11</TD><TD><input TYPE="text" ID="Team11" NAME="Team11" /></TD><TD></TD>
+        <TD>Team21</TD><TD><input TYPE="text" ID="Team21" NAME="Team21" /></TD><TD></TD>
+        <TD>Team31</TD><TD><input TYPE="text" ID="Team31" NAME="Team31" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team2 </TD><TD><input TYPE="text" ID="Team2"  NAME="Team2"  /></TD><TD></TD>
+        <TD>Team12</TD><TD><input TYPE="text" ID="Team12" NAME="Team12" /></TD><TD></TD>
+        <TD>Team22</TD><TD><input TYPE="text" ID="Team22" NAME="Team22" /></TD><TD></TD>
+        <TD>Team32</TD><TD><input TYPE="text" ID="Team32" NAME="Team32" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team3 </TD><TD><input TYPE="text" ID="Team3"  NAME="Team3"  /></TD><TD></TD>
+        <TD>Team13</TD><TD><input TYPE="text" ID="Team13" NAME="Team13" /></TD><TD></TD>
+        <TD>Team23</TD><TD><input TYPE="text" ID="Team23" NAME="Team23" /></TD><TD></TD>
+        <TD>Team33</TD><TD><input TYPE="text" ID="Team33" NAME="Team33" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team4 </TD><TD><input TYPE="text" ID="Team4"  NAME="Team4"  /></TD><TD></TD>
+        <TD>Team14</TD><TD><input TYPE="text" ID="Team14" NAME="Team14" /></TD><TD></TD>
+        <TD>Team24</TD><TD><input TYPE="text" ID="Team24" NAME="Team24" /></TD><TD></TD>
+        <TD>Team34</TD><TD><input TYPE="text" ID="Team34" NAME="Team34" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team5 </TD><TD><input TYPE="text" ID="Team5"  NAME="Team5"  /></TD><TD></TD>
+        <TD>Team15</TD><TD><input TYPE="text" ID="Team15" NAME="Team15" /></TD><TD></TD>
+        <TD>Team25</TD><TD><input TYPE="text" ID="Team25" NAME="Team25" /></TD><TD></TD>
+        <TD>Team35</TD><TD><input TYPE="text" ID="Team35" NAME="Team35" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team6 </TD><TD><input TYPE="text" ID="Team6"  NAME="Team6"  /></TD><TD></TD>
+        <TD>Team16</TD><TD><input TYPE="text" ID="Team16" NAME="Team16" /></TD><TD></TD>
+        <TD>Team26</TD><TD><input TYPE="text" ID="Team26" NAME="Team26" /></TD><TD></TD>
+        <TD>Team36</TD><TD><input TYPE="text" ID="Team36" NAME="Team36" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team7 </TD><TD><input TYPE="text" ID="Team7"  NAME="Team7"  /></TD><TD></TD>
+        <TD>Team17</TD><TD><input TYPE="text" ID="Team17" NAME="Team17" /></TD><TD></TD>
+        <TD>Team27</TD><TD><input TYPE="text" ID="Team27" NAME="Team27" /></TD><TD></TD>
+        <TD>Team37</TD><TD><input TYPE="text" ID="Team37" NAME="Team37" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team8 </TD><TD><input TYPE="text" ID="Team8"  NAME="Team8"  /></TD><TD></TD>
+        <TD>Team18</TD><TD><input TYPE="text" ID="Team18" NAME="Team18" /></TD><TD></TD>
+        <TD>Team28</TD><TD><input TYPE="text" ID="Team28" NAME="Team28" /></TD><TD></TD>
+        <TD>Team38</TD><TD><input TYPE="text" ID="Team38" NAME="Team38" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team9 </TD><TD><input TYPE="text" ID="Team9"  NAME="Team9"  /></TD><TD></TD>
+        <TD>Team19</TD><TD><input TYPE="text" ID="Team19" NAME="Team19" /></TD><TD></TD>
+        <TD>Team29</TD><TD><input TYPE="text" ID="Team29" NAME="Team29" /></TD><TD></TD>
+        <TD>Team39</TD><TD><input TYPE="text" ID="Team39" NAME="Team39" /></TD><TD></TD>
+    </TR>
+    <TR>
+        <TD>Team10</TD><TD><input TYPE="text" ID="Team10" NAME="Team10" /></TD><TD></TD>
+        <TD>Team20</TD><TD><input TYPE="text" ID="Team20" NAME="Team20" /></TD><TD></TD>
+        <TD>Team30</TD><TD><input TYPE="text" ID="Team30" NAME="Team30" /></TD><TD></TD>
+        <TD>Team40</TD><TD><input TYPE="text" ID="Team40" NAME="Team40" /></TD><TD></TD>
+    </TR>
+  </TABLE>
+  <BR/>
+</FORM>
+<BUTTON onclick="handleScores()">Generate Score Sheets</BUTTON>
+<BUTTON onclick="handleSchema()">Generate Schema</BUTTON>
+
+</BODY>
+</HTML>
+
